@@ -8,7 +8,7 @@ from transformations.weather_transformations import save_city_dimensions
 
 openweather_api_key = os.environ.get('OPENWEATHER_API_KEY')
 openweather_version = '2.5'
-city, province, country = 'Vancouver', 'BC', 'CA'
+city, province, country = 'Hong Kong', 'Hong Kong', 'HK'
 
 default_args = {
     'owner': 'ginsstaahh',
