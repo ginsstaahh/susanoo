@@ -95,8 +95,7 @@ You can then start the webserver using a shell script or running these commmands
 
 `export AIRFLOW_HOME=$(pwd)`
 
-`airflow scheduler &`
-`airflow webserver -p 8080`
+`airflow scheduler & airflow webserver -p 8080`
 
 Try running the openweather_current_dag and notice the weather updates without you having to trigger it.
 

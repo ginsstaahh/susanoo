@@ -1,0 +1,17 @@
+{"city": "Vancouver", "country": "CA", "longitude": -123.1193, "latitude": 49.2497, "timezone": -28800}
+{"city": "Calgary", "country": "CA", "longitude": -114.0626, "latitude": 51.0534, "timezone": -25200}
+{"city": "Edmonton", "country": "CA", "longitude": -113.508, "latitude": 53.5354, "timezone": -25200}
+{"city": "Saskatoon", "country": "CA", "longitude": -106.6608, "latitude": 52.1318, "timezone": -21600}
+{"city": "Winnipeg", "country": "CA", "longitude": -97.1686, "latitude": 49.884, "timezone": -21600}
+{"city": "Toronto", "country": "CA", "longitude": -79.3872, "latitude": 43.654, "timezone": -18000}
+{"city": "Ottawa", "country": "CA", "longitude": -75.6903, "latitude": 45.4211, "timezone": -18000}
+{"city": "Montreal", "country": "CA", "longitude": -73.6104, "latitude": 45.4972, "timezone": -18000}
+{"city": "Halifax", "country": "CA", "longitude": -63.5751, "latitude": 44.6491, "timezone": -14400}
+{"city": "Seattle", "country": "US", "longitude": -122.3321, "latitude": 47.6062, "timezone": -25200}
+{"city": "San Francisco", "country": "US", "longitude": -122.4194, "latitude": 37.7749, "timezone": -28800}
+{"city": "Los Angeles", "country": "US", "longitude": -118.2437, "latitude": 34.0522, "timezone": -28800}
+{"city": "Tokyo", "country": "JP", "longitude": 139.6917, "latitude": 35.6895, "timezone": 32400}
+{"city": "Beijing", "country": "CN", "longitude": 116.3972, "latitude": 39.9075, "timezone": 28800}
+{"city": "Hong Kong", "country": "HK", "longitude": 114.1577, "latitude": 22.2855, "timezone": 28800}
+{"city": "Manila", "country": "PH", "longitude": 120.9822, "latitude": 14.6042, "timezone": 28800}
+{"city": "Sydney", "country": "AU", "longitude": 151.2073, "latitude": -33.8679, "timezone": 39600}
