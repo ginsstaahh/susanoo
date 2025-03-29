@@ -61,7 +61,7 @@ with DAG('weather_etl',
 with DAG('upload_weather_graphs',
     default_args=default_args,
     schedule='@daily',
-    catchup=False
+    catchup=True
 ) as dag:
 
     start_tasks = DummyOperator(task_id='start_tasks')
@@ -70,11 +70,22 @@ with DAG('upload_weather_graphs',
     def graph_daily_weather(**kwargs):
         ds = kwargs['ds']
 
-        select_day = f'SELECT * FROM weather WHERE DATE(time) BETWEEN {ds} AND {ds}'
-        select_all = "SELECT * FROM weather"
+        select_day = f'SELECT * FROM weather WHERE DATE(time) LIKE :ds'
+        # select_all = "SELECT * FROM weather"
+        select_range = text("""
+            SELECT * FROM table_name 
+            WHERE timestamp_column >= :start_date 
+            AND timestamp_column < :end_date
+        """)
+        date_range = {
+            'start_date': '2023-12-20',
+            'end_date': '2023-12-21'  # Next day to capture full day
+        }
 
-        query = text(select_all)
-        df = pd.read_sql(query, engine)
+        query = text(select_day)
+        df = pd.read_sql(query, engine, params={'ds': ds})
+        df['time'] = pd.to_datetime(df['time'])
+        # df = df[df['time'].dt.date == pd.to_datetime(ds).date()]
 
         for location in locations:
             city = location['city']

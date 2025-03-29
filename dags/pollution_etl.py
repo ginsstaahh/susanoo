@@ -64,7 +64,7 @@ with DAG(f'pollution_etl',
 with DAG('upload_pollution_graphs',
     default_args=default_args,
     schedule='@daily',
-    catchup=False
+    catchup=True
 ) as dag:
 
     start_tasks = DummyOperator(task_id='start_tasks')
@@ -73,10 +73,13 @@ with DAG('upload_pollution_graphs',
     def graph_daily_pollution(**kwargs):
         ds = kwargs['ds']
 
-        select_day = f'SELECT * FROM pollution WHERE DATE(time) BETWEEN {ds} AND {ds}'
+        select_day = f'SELECT * FROM pollution WHERE DATE(time) LIKE :ds'
+        # select_day = 'SELECT * FROM pollution'
 
         query = text(select_day)
-        df = pd.read_sql(query, engine)
+        df = pd.read_sql(query, engine, params={'ds': ds})
+        df['time'] = pd.to_datetime(df['time'])
+        # df = df[df['time'].dt.date == pd.to_datetime(ds).date()]
 
         for location in locations:
             city = location['city']
