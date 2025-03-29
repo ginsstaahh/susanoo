@@ -4,12 +4,14 @@ from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.providers.http.operators.http import HttpOperator
-import boto3
-from botocore.exceptions import ClientError
 from datetime import datetime, timedelta
+from helpers.google import drive_service, upload_image
+from helpers.graphing import Plotly
+from helpers.session import session, engine
 import json
 import os
-import pendulum
+import pandas as pd
+from sqlalchemy import text
 from helpers.transformations import transform_pollution_data
 
 openweather_api_key = os.environ.get('OPENWEATHER_API_KEY')
@@ -28,87 +30,72 @@ default_args = {
     'retries': 0,
 }
 
-for location in locations:
-    city = location['city']
-    country = location['country']
-    longitude = location['longitude']
-    latitude = location['latitude']
+with DAG(f'pollution_etl',
+        default_args=default_args,
+        schedule_interval='@hourly',
+        catchup=False
+) as dag:
+    
+    for location in locations:
+        city = location['city']
+        country = location['country']
+        longitude = location['longitude']
+        latitude = location['latitude']
 
-    city_dag_name = city.replace(' ', '_').lower()
-    with DAG(f'{city_dag_name}_pollution_etl_dag',
-            default_args=default_args,
-            schedule_interval=timedelta(minutes=15),
-            catchup=False
-    ) as dag:
+        city_codename = city.replace(' ', '_').lower()
 
         extract_data = HttpOperator(
-            task_id='get_pollution_data',
+            task_id=f'get_{city_codename}_pollution_data',
             http_conn_id='openweather_conn',
             endpoint=f'data/{openweather_version}/air_pollution?lat={latitude}&lon={longitude}&appid={openweather_api_key}',
             method='GET',
             response_filter=lambda response: json.loads(response.text),
         )
 
-        transform_data = PythonOperator(
-            task_id='transform_pollution_data',
+        transform_and_load_data = PythonOperator(
+            task_id=f'transform_{city_codename}_pollution_data',
             python_callable=transform_pollution_data,
             op_kwargs = {'city': city, 'country': country}
         )
 
-    extract_data >> transform_data
+        extract_data >> transform_and_load_data
 
 
-with DAG('upload_pollution_data_dag',
+with DAG('upload_pollution_graphs',
     default_args=default_args,
     schedule='@daily',
-    start_date=pendulum.datetime(2025, 2, 9, tz='local'),
-    catchup=True
+    catchup=False
 ) as dag:
 
     start_tasks = DummyOperator(task_id='start_tasks')
 
     @task
-    def check_file_exists(**kwargs):
+    def graph_daily_pollution(**kwargs):
         ds = kwargs['ds']
-        filename = f'pollution-{ds}.json'
 
-        if os.path.exists(f'pollution/{filename}'):
-            print('The pollution file exists')
-            return True
-        else:
-            return False
+        select_day = f'SELECT * FROM pollution WHERE DATE(time) BETWEEN {ds} AND {ds}'
 
-    @task.branch
-    def skip_run(file_exists):
-        if file_exists:
-            return ['clean_data']
-        else:
-            return ['end_tasks']
+        query = text(select_day)
+        df = pd.read_sql(query, engine)
 
-    # create a temporary file to work with before replacing the working file.  This needs to be done for a sort command.
-    # This sorts the data alphabetically and removes duplicate rows
-    clean_data = BashOperator(
-        task_id='clean_data',
-        bash_command='sort -u ~/Documents/susanoo/pollution/pollution-{{ ds }}.json > /tmp/pollution-{{ ds }}.json && \
-            mv /tmp/pollution-{{ ds }}.json ~/Documents/susanoo/pollution/pollution-{{ ds }}.json'
-    )
+        for location in locations:
+            city = location['city']
+            Plotly.graph_aqi(df, ds, city)
+
+    drive_directory_ids = {
+        'aqi' : '1eLb-Ie1np2Rhqht5dCRGMuqXhso_NZ-M'
+    }
 
     @task
-    def upload_data(**kwargs):
+    def upload_daily_images(**kwargs):
         ds = kwargs['ds']
-        filename = f'pollution-{ds}.json'
+        for location in locations:
+            city = location['city']
 
-        s3_client = boto3.client('s3')
-        try:
-            s3_client.upload_file(f'pollution/{filename}', 'susanoo-pollution', filename)
-        except ClientError as e:
-            print(e)
-            return False
-        return True
+            print(f'File ID: {file_id}')
+            file_id = upload_image(drive_directory_ids['aqi'],
+                                   filepath=f'graphs/{city}-aqi-{ds}.png',
+                                   filename=f'{city}-aqi-{ds}.png')
+            print(f'File ID: {file_id}')
 
-    end_tasks = DummyOperator(task_id='end_tasks')
-
-file_exists = check_file_exists()
-
-start_tasks >> file_exists >> skip_run(file_exists) >> [clean_data, end_tasks]
-clean_data >> upload_data() >> end_tasks
+start_tasks
