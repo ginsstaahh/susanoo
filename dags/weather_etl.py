@@ -1,18 +1,12 @@
 from airflow import DAG
 from airflow.decorators import task
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.dummy import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.providers.http.operators.http import HttpOperator
 from datetime import datetime, timedelta
 from helpers.transformations import transform_weather_data
-from helpers.google import drive_service, upload_image
-from helpers.graphing import Plotly
-from helpers.session import session, engine
+from helpers.google import sheets_service
 import json
 import os
-import pandas as pd
-from sqlalchemy import text
 
 openweather_api_key = os.environ.get('OPENWEATHER_API_KEY')
 openweather_version = '2.5'
@@ -30,20 +24,20 @@ default_args = {
     'retries': 0,
 }
 
-
-with DAG('weather_etl',
-        default_args=default_args,
-        schedule_interval=timedelta(minutes=15),
-        catchup=False
-) as dag:
-
-    for location in locations:
-        city = location['city']
-        country = location['country']
-        city_codename = city.replace(' ', '_').lower()
+for location in locations:
+    city = location['city']
+    country = location['country']
+    
+    # DAG names cannot include spaces therefore underscores are added to city names
+    city_codename = city.replace(' ', '_').lower()
+    with DAG(f'{city_codename}_weather_etl',
+            default_args=default_args,
+            schedule_interval=timedelta(minutes=15),
+            catchup=False
+    ) as dag:
 
         extract_data = HttpOperator(
-            task_id=f'get_{city_codename}_weather_data',
+            task_id=f'get_weather_data',
             http_conn_id='openweather_conn',
             endpoint=f'data/{openweather_version}/weather?q={city},{country}&appid={openweather_api_key}',
             method='GET',
@@ -51,67 +45,27 @@ with DAG('weather_etl',
         )
 
         transform_data = PythonOperator(
-            task_id=f'transform_{city_codename}_weather_data',
+            task_id=f'transform_weather_data',
             python_callable=transform_weather_data,
         )
 
-        extract_data >> transform_data
+        @task
+        def update_weather_sheet(**kwargs):
+            """
+            Updates the weather sheet with the provided data.
+            Args:
+                sheet_id (str): The ID of the sheet to update
+                data (list): The data to update the sheet with
+            """
+            weather_data = kwargs['ti'].xcom_pull(task_ids=f'transform_weather_data')
+            spreadsheet_id = '1H2te8n_4auKfRCbmduC-hwm2GQgudOs9J5JwA1L_SyY'
+            sheets_service.spreadsheets().values().append(
+                spreadsheetId=spreadsheet_id,
+                valueInputOption='USER_ENTERED',
+                range='weather!A2',
+                body={
+                    'values': weather_data
+                }
+            ).execute()
 
-
-with DAG('upload_weather_graphs',
-    default_args=default_args,
-    schedule='@daily',
-    catchup=True
-) as dag:
-
-    start_tasks = DummyOperator(task_id='start_tasks')
-
-    @task
-    def graph_daily_weather(**kwargs):
-        ds = kwargs['ds']
-
-        select_day = f'SELECT * FROM weather WHERE DATE(time) LIKE :ds'
-        # select_all = "SELECT * FROM weather"
-        select_range = text("""
-            SELECT * FROM table_name 
-            WHERE timestamp_column >= :start_date 
-            AND timestamp_column < :end_date
-        """)
-        date_range = {
-            'start_date': '2023-12-20',
-            'end_date': '2023-12-21'  # Next day to capture full day
-        }
-
-        query = text(select_day)
-        df = pd.read_sql(query, engine, params={'ds': ds})
-        df['time'] = pd.to_datetime(df['time'])
-        # df = df[df['time'].dt.date == pd.to_datetime(ds).date()]
-
-        for location in locations:
-            city = location['city']
-            Plotly.graph_temperature(df, ds, city)
-            Plotly.graph_humidity(df, ds, city)
-    
-
-    drive_directory_ids = {
-        'temperature' : '1cCcWsGyDKelB2Ir6fALfthoudTLSBTDr',
-        'humidity' : '1D5QTP7pWTsqHWXe-WFBkpwRknxeJY-r1',
-    }
-
-    @task
-    def upload_daily_images(**kwargs):
-        ds = kwargs['ds']
-        for location in locations:
-            city = location['city']
-
-            print(f'Uploading daily images for {city} to Google Drive')
-            file_id = upload_image(drive_directory_ids['temperature'],
-                                   filepath=f'graphs/{city}-temperature-{ds}.png',
-                                   filename=f'{city}-temperature-{ds}.png')
-            print(f'File ID: {file_id}')
-            file_id = upload_image(drive_directory_ids['humidity'],
-                                   filepath=f'graphs/{city}-humidity-{ds}.png',
-                                   filename=f'{city}-humidity-{ds}.png')
-            print(f'File ID: {file_id}')
-
-start_tasks
+        extract_data >> transform_data >> update_weather_sheet()
