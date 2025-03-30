@@ -1,6 +1,4 @@
 from datetime import datetime
-import json
-from helpers.google import sheets_service
 
 def kelvin_to_celsius(kelvin):
     celsius = round(kelvin - 273.15, 2)
