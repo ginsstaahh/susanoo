@@ -14,7 +14,7 @@ def transform_weather_data(task_instance):
         base = weather_data['base'],
         temperature = kelvin_to_celsius(weather_data['main']['temp']),
         description = weather_data['weather'][0]['description'],
-        time = datetime.fromtimestamp(weather_data['dt']).strftime("%Y-%m-%d %H:%M:%S"),
+        time = weather_data['dt'],
         min_temp = kelvin_to_celsius(weather_data['main']['temp_min']),
         max_temp = kelvin_to_celsius(weather_data['main']['temp_max']),
         pressure = weather_data['main']['pressure'],
@@ -31,7 +31,7 @@ def transform_pollution_data(task_instance, city, country):
     pollution = Pollution(
         city = city,
         country = country,
-        time = datetime.fromtimestamp(pollution_data['list'][0]['dt']).strftime("%Y-%m-%d %H:%M:%S"),
+        time = pollution_data['list'][0]['dt'],
         aqi = pollution_data['list'][0]['main']['aqi'],
         co = pollution_data['list'][0]['components']['co'],
         no = pollution_data['list'][0]['components']['no'],
