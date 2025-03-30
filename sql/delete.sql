@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS weather;
+DROP TABLE IF EXISTS pollution;
+DROP TABLE IF EXISTS cities;

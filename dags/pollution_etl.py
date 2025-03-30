@@ -58,44 +58,8 @@ with DAG(f'pollution_etl',
             op_kwargs = {'city': city, 'country': country}
         )
 
-        extract_data >> transform_and_load_data
+        @task
+        def load_to_snowflake(**kwargs):
+            pass
 
-
-with DAG('upload_pollution_graphs',
-    default_args=default_args,
-    schedule='@daily',
-    catchup=False
-) as dag:
-
-    start_tasks = DummyOperator(task_id='start_tasks')
-
-    @task
-    def graph_daily_pollution(**kwargs):
-        ds = kwargs['ds']
-
-        select_day = f'SELECT * FROM pollution WHERE DATE(time) BETWEEN {ds} AND {ds}'
-
-        query = text(select_day)
-        df = pd.read_sql(query, engine)
-
-        for location in locations:
-            city = location['city']
-            Plotly.graph_aqi(df, ds, city)
-
-    drive_directory_ids = {
-        'aqi' : '1eLb-Ie1np2Rhqht5dCRGMuqXhso_NZ-M'
-    }
-
-    @task
-    def upload_daily_images(**kwargs):
-        ds = kwargs['ds']
-        for location in locations:
-            city = location['city']
-
-            print(f'File ID: {file_id}')
-            file_id = upload_image(drive_directory_ids['aqi'],
-                                   filepath=f'graphs/{city}-aqi-{ds}.png',
-                                   filename=f'{city}-aqi-{ds}.png')
-            print(f'File ID: {file_id}')
-
-start_tasks
+        extract_data >> transform_and_load_data >> load_to_snowflake()

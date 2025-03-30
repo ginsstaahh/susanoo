@@ -30,20 +30,19 @@ default_args = {
     'retries': 0,
 }
 
+for location in locations:
+    city = location['city']
+    country = location['country']
 
-with DAG('weather_etl',
-        default_args=default_args,
-        schedule_interval=timedelta(minutes=15),
-        catchup=False
-) as dag:
-
-    for location in locations:
-        city = location['city']
-        country = location['country']
-        city_codename = city.replace(' ', '_').lower()
+    city_codename = city.replace(' ', '_').lower()
+    with DAG(f'{city_codename}_weather_etl',
+            default_args=default_args,
+            schedule_interval=timedelta(minutes=15),
+            catchup=False
+    ) as dag:
 
         extract_data = HttpOperator(
-            task_id=f'get_{city_codename}_weather_data',
+            task_id=f'get_weather_data',
             http_conn_id='openweather_conn',
             endpoint=f'data/{openweather_version}/weather?q={city},{country}&appid={openweather_api_key}',
             method='GET',
@@ -51,56 +50,12 @@ with DAG('weather_etl',
         )
 
         transform_data = PythonOperator(
-            task_id=f'transform_{city_codename}_weather_data',
+            task_id=f'transform_weather_data',
             python_callable=transform_weather_data,
         )
 
-        extract_data >> transform_data
+        @task
+        def load_to_snowflake(**kwargs):
+            pass
 
-
-with DAG('upload_weather_graphs',
-    default_args=default_args,
-    schedule='@daily',
-    catchup=False
-) as dag:
-
-    start_tasks = DummyOperator(task_id='start_tasks')
-
-    @task
-    def graph_daily_weather(**kwargs):
-        ds = kwargs['ds']
-
-        select_day = f'SELECT * FROM weather WHERE DATE(time) BETWEEN {ds} AND {ds}'
-        select_all = "SELECT * FROM weather"
-
-        query = text(select_all)
-        df = pd.read_sql(query, engine)
-
-        for location in locations:
-            city = location['city']
-            Plotly.graph_temperature(df, ds, city)
-            Plotly.graph_humidity(df, ds, city)
-    
-
-    drive_directory_ids = {
-        'temperature' : '1cCcWsGyDKelB2Ir6fALfthoudTLSBTDr',
-        'humidity' : '1D5QTP7pWTsqHWXe-WFBkpwRknxeJY-r1',
-    }
-
-    @task
-    def upload_daily_images(**kwargs):
-        ds = kwargs['ds']
-        for location in locations:
-            city = location['city']
-
-            print(f'Uploading daily images for {city} to Google Drive')
-            file_id = upload_image(drive_directory_ids['temperature'],
-                                   filepath=f'graphs/{city}-temperature-{ds}.png',
-                                   filename=f'{city}-temperature-{ds}.png')
-            print(f'File ID: {file_id}')
-            file_id = upload_image(drive_directory_ids['humidity'],
-                                   filepath=f'graphs/{city}-humidity-{ds}.png',
-                                   filename=f'{city}-humidity-{ds}.png')
-            print(f'File ID: {file_id}')
-
-start_tasks
+        extract_data >> transform_data >> load_to_snowflake()
