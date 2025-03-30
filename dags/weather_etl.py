@@ -1,18 +1,10 @@
 from airflow import DAG
-from airflow.decorators import task
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.dummy import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.providers.http.operators.http import HttpOperator
 from datetime import datetime, timedelta
 from helpers.transformations import transform_weather_data
-from helpers.google import drive_service, upload_image
-from helpers.graphing import Plotly
-from helpers.session import session, engine
 import json
 import os
-import pandas as pd
-from sqlalchemy import text
 
 openweather_api_key = os.environ.get('OPENWEATHER_API_KEY')
 openweather_version = '2.5'
@@ -54,8 +46,4 @@ for location in locations:
             python_callable=transform_weather_data,
         )
 
-        @task
-        def load_to_snowflake(**kwargs):
-            pass
-
-        extract_data >> transform_data >> load_to_snowflake()
+        extract_data >> transform_data

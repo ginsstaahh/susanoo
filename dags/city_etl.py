@@ -1,12 +1,10 @@
 from airflow import DAG
-from airflow.decorators import task
 from airflow.providers.http.operators.http import HttpOperator
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 import json
 import os
 from helpers.transformations import transform_city_data
-from helpers.google import sheets_service
 
 openweather_api_key = os.environ.get('OPENWEATHER_API_KEY')
 openweather_version = '2.5'
@@ -39,8 +37,4 @@ with DAG('city_etl',
         python_callable=transform_city_data,
     )
 
-    @task
-    def load_to_snowflake(**kwargs):
-        pass
-
-get_city_data >> transform_data >> load_to_snowflake()
+get_city_data >> transform_data
