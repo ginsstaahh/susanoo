@@ -8,7 +8,7 @@ from helpers.transformations import transform_city_data
 
 openweather_api_key = os.environ.get('OPENWEATHER_API_KEY')
 openweather_version = '2.5'
-city, province, country = 'San Francisco', 'CA', 'US'
+city, province, country = 'Seattle', 'WA', 'US'
 
 default_args = {
     'owner': 'ginsstaahh',
@@ -32,9 +32,9 @@ with DAG('city_etl',
         response_filter=lambda response: json.loads(response.text),
     )
 
-    transform_data = PythonOperator(
+    transform_and_load_data = PythonOperator(
         task_id='transform_city_data',
         python_callable=transform_city_data,
     )
 
-get_city_data >> transform_data
+get_city_data >> transform_and_load_data

@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 class City(Base):
-    __tablename__ = "cities"
+    __tablename__ = 'cities'
     
     id = Column('id', Integer, primary_key=True)
     city = Column('city', String, nullable=False)
@@ -14,14 +14,14 @@ class City(Base):
     timezone = Column('timezone', Integer, nullable=False)
     
 class Weather(Base):
-    __tablename__ = "weather"
+    __tablename__ = 'weather'
     
     id = Column('id', Integer, primary_key=True)
     city = Column('city', String, nullable=False)
     country = Column('country', String, nullable=False)
     base = Column('base', String, nullable=False)
     description = Column('description', String, nullable=False)
-    time = Column('time', String, nullable=False)
+    time = Column('time', Integer, nullable=False)
     temperature = Column('temperature', Float, nullable=False)
     min_temp = Column('min_temp', Float, nullable=False)
     max_temp = Column('max_temp', Float, nullable=False)
@@ -32,12 +32,12 @@ class Weather(Base):
     wind_deg = Column('wind_deg', Integer, nullable=False)
 
 class Pollution(Base):
-    __tablename__ = "pollution"
+    __tablename__ = 'pollution'
     
     id = Column('id', Integer, primary_key=True)
     city = Column('city', String, nullable=False)
     country = Column('country', String, nullable=False)
-    time = Column('time', String, nullable=False)
+    time = Column('time', Integer, nullable=False)
     aqi = Column('aqi', Integer, nullable=False)
     co = Column('co', Float, nullable=False)
     no = Column('no', Float, nullable=False)

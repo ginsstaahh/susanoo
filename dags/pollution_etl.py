@@ -28,7 +28,7 @@ for location in locations:
     longitude = location['longitude']
     latitude = location['latitude']
 
-    city_codename = city.replace(' ', '_').lower()
+    city_codename = city.replace(' ', '_').lower() # DAG names cannot have spaces
     with DAG(f'{city_codename}_pollution_etl',
             default_args=default_args,
             schedule_interval='@hourly',

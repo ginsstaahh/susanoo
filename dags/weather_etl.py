@@ -26,7 +26,7 @@ for location in locations:
     city = location['city']
     country = location['country']
 
-    city_codename = city.replace(' ', '_').lower()
+    city_codename = city.replace(' ', '_').lower() # DAG names cannot have spaces
     with DAG(f'{city_codename}_weather_etl',
             default_args=default_args,
             schedule_interval=timedelta(minutes=15),
