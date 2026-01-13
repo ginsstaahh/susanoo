@@ -1,5 +1,13 @@
 # Introduction
-This Airflow project logs weather data for Vancouver on a 15 minute interval using Openweather's API and weather station.  It can additionally format city dimension data to give context about Vancouver on a no-scheduled, trigger basis.  Finally, weather data is uploaded to S3 so that data scientists with permissions can work with the data using tools like Spark on EMR or Glue.  It is an example of performing an ETL on a schedule and formatting both fact and dimension data for respective use cases.  This project is named after Susanoo, the Japanese storm god in Shinto religion.
+Susanoo is a data engineering project that explores the different formats data can be stored on the cloud.  It retrieves pollution and weather data from Openweather using their API and is transformed and uploaded to the cloud.  There are three git branches where data is stored locally in different formats and then uploaded to certain cloud sources as shown in this table:
+
+| Branch Name | Local Data Format | Cloud Storage Type  |
+| ------------- | ------------- | ------------- |
+| json  | JSON  | S3 bucket  |
+| csv  | CSV  | gsheets on Google Drive  |
+| sql  | postgreSQL  | Snowflake Data Warehouse  |
+
+Data scientists with permissions can work with the data using tools like Spark on EMR or Glue in S3, or use SQL in Snowflake.  For non-techincal end-users who aren't familiar with AWS or Snowflake it is possible to read the data in gsheets.  Susanoo is an example of performing ETL's on a schedule and formatting fact and dimension data for respective use cases.  This project is a sister project to Akashi.  Whereas Akashi is a full-scale data engineering + analytics project with stock graphs for end users, Akashi is a purely data engineering project that explores the many ways data can be formatted and stored on the cloud.  It is named after Susanoo, the Japanese storm god in Shinto religion.
 
 # JSON data
 The normal HTTP response from Openweather's API is like such:
@@ -69,12 +77,13 @@ Reformatting this into fact data makes it organized and easier to understand for
     "wind_deg": 110
 }
 ```
+
 The first four JSON attributes give context to the weather data (city, country, base, description)
 and the last 9 attributes are pure fact data.
 
-Fact data can be used for data scientists interested in learning about the climate in Vancouver.  If this program were to run on a server for years recording fact data, data scientists could also use it to find insights on climate change and it's impact to the city.
+Fact data can be used for data scientists interested in learning about the climate in the specific city.  If this program were to run on a server for years recording fact data, data scientists could also use it to find insights on climate change and it's impact to the city.
 
-Dimension data is also created that gives context to Vancouver city.  It looks like this:
+Dimension data is also created that gives context to the city.  It looks like this:
 ```json
 {
     "city": "Vancouver",
@@ -84,7 +93,7 @@ Dimension data is also created that gives context to Vancouver city.  It looks l
     "timezone": -25200
 }
 ```
-Because the dimension data is static and not long thought to change (unless the city or the country change their names), the DAG responsible for fetching the data only does this on a triggered basis and there is no schedule for updating the city_dimensions.json file where the dimension data is stored.
+Because the dimension data about a city is static and not thought to change (unless the city or the country change their names), the DAG responsible for fetching this type of data is not on a schedule for updating cities
 
 # Running the program
 If you have airflow on your linux or mac, you can first `cd` into the project directory and run the bash command
