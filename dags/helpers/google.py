@@ -11,10 +11,6 @@ sheets_api_version = 'v4'
 # Scope tells what authorization the service can perform.
 sheets_scope = 'https://www.googleapis.com/auth/spreadsheets'
 
-drive_api_name = 'drive'
-drive_api_version = 'v3'
-drive_scope = 'https://www.googleapis.com/auth/drive.file'
-
 def create_service(client_secret_file, api_name, api_version, *scopes):
     """This service provides access to Google's APIs given authorization.
     Args:
@@ -60,4 +56,3 @@ def create_service(client_secret_file, api_name, api_version, *scopes):
         return None
     
 sheets_service = create_service(client_secret_file, sheets_api_name, sheets_api_version, sheets_scope)
-drive_service = create_service(client_secret_file, drive_api_name, drive_api_version, drive_scope)

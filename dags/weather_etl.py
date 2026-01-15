@@ -64,7 +64,7 @@ for location in locations:
                 valueInputOption='USER_ENTERED',
                 range='weather!A2',
                 body={
-                    'values': weather_data
+                    'values': [weather_data]
                 }
             ).execute()
 

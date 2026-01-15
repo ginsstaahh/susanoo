@@ -67,7 +67,7 @@ for location in locations:
                 valueInputOption='USER_ENTERED',
                 range='pollution!A2',
                 body={
-                    'values': pollution_data
+                    'values': [pollution_data]
                 }
             ).execute()
 

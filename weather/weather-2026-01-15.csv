@@ -1,0 +1,5 @@
+city,country,base,description,time,temperature,temp_min,temp_max,pressure,humidity,visibility,wind_speed,wind_deg
+Vancouver,CA,stations,overcast clouds,2026-01-15 06:42:04,6.56,6.12,7.57,1033,97,10000,3.6,320
+Seattle,US,stations,overcast clouds,2026-01-15 06:38:27,8.71,7.7,9.42,1032,92,10000,4.12,10
+Los Angeles,US,stations,clear sky,2026-01-15 06:40:06,16.16,12.7,18.33,1018,44,10000,2.06,50
+San Francisco,US,stations,few clouds,2026-01-15 06:42:14,10.4,7.92,12.45,1018,82,10000,4.47,105

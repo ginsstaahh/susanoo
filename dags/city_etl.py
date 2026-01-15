@@ -10,7 +10,7 @@ from helpers.google import sheets_service
 
 openweather_api_key = os.environ.get('OPENWEATHER_API_KEY')
 openweather_version = '2.5'
-city, province, country = 'San Francisco', 'CA', 'US'
+city, province, country = 'Vancouver', 'BC', 'CA'
 
 default_args = {
     'owner': 'ginsstaahh',
@@ -55,7 +55,7 @@ with DAG('city_etl',
             valueInputOption='USER_ENTERED',
             range='cities!A2',
             body={
-                'values': weather_data
+                'values': [weather_data]
             }
         ).execute()
 
