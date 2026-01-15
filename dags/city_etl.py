@@ -44,7 +44,7 @@ with DAG('city_etl',
     def update_cities_sheet(**kwargs):
         """
         Updates the weather sheet with the provided data.
-        Args:
+        Keyword Args:
             sheet_id (str): The ID of the sheet to update
             data (list): The data to update the sheet with
         """

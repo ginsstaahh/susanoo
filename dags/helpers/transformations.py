@@ -5,6 +5,11 @@ def kelvin_to_celsius(kelvin):
     return celsius
 
 def transform_weather_data(task_instance):
+    """processes raw JSON weather data to a refined format
+    Args:
+        task_instance - The task instance from Airflow to pull XCom data
+    Returns:
+        transformed_data - A list containing the transformed weather data in a format usable by Google Sheets API"""
     weather_data = task_instance.xcom_pull(task_ids='get_weather_data')
     transformed_data =  [[
             weather_data['name'],
@@ -25,7 +30,12 @@ def transform_weather_data(task_instance):
     return transformed_data
 
 
-def transform_pollution_data(task_instance, city, country):
+def transform_pollution_data(task_instance, city, country):    
+    """processes raw JSON pollution data to a refined format
+    Args:
+        task_instance - The task instance from Airflow to pull XCom data
+    Returns:
+        transformed_data - A list containing the transformed pollution data in a format usable by Google Sheets API"""
     pollution_data = task_instance.xcom_pull(task_ids='get_pollution_data')
     transformed_data = [[
             city,
@@ -46,7 +56,11 @@ def transform_pollution_data(task_instance, city, country):
 
 
 def transform_city_data(task_instance):
-    """process raw JSON data to dimension data of the city"""
+    """processes raw JSON data to contextual data about the city
+    Args:
+        task_instance - The task instance from Airflow to pull XCom data
+    Returns:
+        transformed_data - A list containing the transformed pollution data in a format usable by Google Sheets API"""
     weather_data = task_instance.xcom_pull(task_ids='get_city_data')
     transformed_data = [[
         weather_data['name'],
