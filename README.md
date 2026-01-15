@@ -1,16 +1,17 @@
 # Introduction
-Susanoo is a data engineering project that explores the different formats data can be stored on the cloud.  It retrieves pollution and weather data from Openweather using their API and is transformed and uploaded to the cloud.  There are three git branches where data is stored locally in different formats and then uploaded to certain cloud sources as shown in this table:
+Susanoo is a data engineering project that explores the different formats data can be stored as.  It retrieves pollution and weather data for different cities on the west coast using Openweather's API.  It then transforms the data and then uploads it to the cloud.  There are three distinct git branches, each with different local and cloud data formats and even tailored README files for these specific data formats.  The structure of each branch is shown in the table below:
 
 | Branch Name | Local Data Format | Cloud Storage Type  |
 | ------------- | ------------- | ------------- |
-| json  | JSON  | S3 bucket  |
+| json  | JSON  | JSON in an S3 bucket  |
 | csv  | CSV  | gsheets on Google Drive  |
 | sql  | postgreSQL  | Snowflake Data Warehouse  |
 
-Data scientists with permissions can work with the data using tools like Spark on EMR or Glue in S3, or use SQL in Snowflake.  For non-techincal end-users who aren't familiar with AWS or Snowflake it is possible to read the data in gsheets.  Susanoo is an example of performing ETL's on a schedule and formatting fact and dimension data for respective use cases.  This project is a sister project to Akashi.  Whereas Akashi is a full-scale data engineering + analytics project with stock graphs for end users, Akashi is a purely data engineering project that explores the many ways data can be formatted and stored on the cloud.  It is named after Susanoo, the Japanese storm god in Shinto religion.
+Susanoo is an example of performing ETL's on a schedule and formatting fact and dimension data for respective use cases.  This project is a sister project to Akashi.  Whereas Akashi is a full-scale data engineering + analytics project with stock graphs for end users, Akashi is a purely data engineering project that explores the many ways data can be formatted and stored.  It is named after Susanoo, the Japanese storm god in Shinto religion.
 
-# JSON data
-The normal HTTP response from Openweather's API is like such:
+# How specifically this branch works
+## Calling Openweather's API's and reorganizing data
+The normal HTTP response from Openweather's API provided with a given city, country, and an API key returns JSON data like such:
 ```json
 {
     "coord": {
@@ -59,53 +60,95 @@ The normal HTTP response from Openweather's API is like such:
     "cod": 200
 }
 ```
-Reformatting this into fact data makes it organized and easier to understand for data science, and looks like such:
+JSON deserialization is performed to transform the weather data into an SQL table, making it organized, decluttered, and easier to understand for data science.  It has the given SQL table structure:
+```sql
+CREATE TABLE IF NOT EXISTS weather (
+    id SERIAL PRIMARY KEY,
+    city TEXT NOT NULL,
+    country TEXT NOT NULL,
+    base TEXT NOT NULL,
+    description TEXT NOT NULL,
+    time INT NOT NULL,
+    temperature FLOAT NOT NULL,
+    min_temp FLOAT NOT NULL,
+    max_temp FLOAT NOT NULL,
+    pressure INT NOT NULL,
+    humidity INT NOT NULL,
+    visibility INT NOT NULL,
+    wind_speed FLOAT NOT NULL,
+    wind_deg INT NOT NULL
+);
+```
+
+The first four columns besides id give context to the weather data (city, country, base, description)
+and the last 9 are purely fact data (data that holds quantitative metrics about weather events).
+
+Dimension data is also created that gives context to the city stored in a SQL table with the given structure:
+```sql
+CREATE TABLE IF NOT EXISTS cities (
+    id SERIAL PRIMARY KEY,
+    city TEXT NOT NULL,
+    country TEXT NOT NULL,
+    latitude FLOAT NOT NULL,
+    longitude FLOAT NOT NULL,
+    timezone INT NOT NULL
+);
+```
+
+To get pollution data from Openweather, there is another API endpoint to use that gives a different HTTP response.  The documentation is here: https://openweathermap.org/api/air-pollution.  The endpoint requires latitude and longitude parameters and so uses the city data we created.  There is no way to get pollution data using city name and country.
+
 ```json
 {
-    "city": "Vancouver",
-    "country": "CA",
-    "base": "stations",
-    "description": "mist",
-    "time": "2024-10-04 09:20:59",
-    "temperature": 10.59,
-    "min_temp": 9.98,
-    "max_temp": 11.57,
-    "pressure": 1007,
-    "humidity": 91,
-    "visibility": 9656,
-    "wind_speed": 5.14,
-    "wind_deg": 110
+  "coord":[
+    50,
+    50
+  ],
+  "list":[
+    {
+      "dt":1605182400,
+      "main":{
+        "aqi":1
+      },
+      "components":{
+        "co":201.94053649902344,
+        "no":0.01877197064459324,
+        "no2":0.7711350917816162,
+        "o3":68.66455078125,
+        "so2":0.6407499313354492,
+        "pm2_5":0.5,
+        "pm10":0.540438711643219,
+        "nh3":0.12369127571582794
+      }
+    }
+  ]
 }
 ```
 
-The first four JSON attributes give context to the weather data (city, country, base, description)
-and the last 9 attributes are pure fact data.
-
-Fact data can be used for data scientists interested in learning about the climate in the specific city.  If this program were to run on a server for years recording fact data, data scientists could also use it to find insights on climate change and it's impact to the city.
-
-Dimension data is also created that gives context to the city.  It looks like this:
-```json
-{
-    "city": "Vancouver",
-    "country": "CA",
-    "longitude": -123.1193,
-    "latitude": 49.2497,
-    "timezone": -25200
-}
+For pollution data the SQL table structure looks like this:
+```sql
+CREATE TABLE IF NOT EXISTS pollution (
+    id SERIAL PRIMARY KEY,
+    city TEXT NOT NULL,
+    country TEXT NOT NULL,
+    time INT NOT NULL,
+    aqi INT NOT NULL,
+    co FLOAT NOT NULL,
+    no FLOAT NOT NULL,
+    no2 FLOAT NOT NULL,
+    o3 FLOAT NOT NULL,
+    so2 FLOAT NOT NULL,
+    pm2_5 FLOAT NOT NULL,
+    pm10 FLOAT NOT NULL,
+    nh3 FLOAT NOT NULL
+);
 ```
-Because the dimension data about a city is static and not thought to change (unless the city or the country change their names), the DAG responsible for fetching this type of data is not on a schedule for updating cities
 
-# Running the program
-If you have airflow on your linux or mac, you can first `cd` into the project directory and run the bash command
-`airflow db init`
-This will create your airflow project.
+The data is first saved on a local postgreSQL database and then transferred to a data warehouse using the `postgres_to_snowflake_etl` for globalizing data.
+The corresponding Snowflake SQL table structures with it's specific syntax can be found in the create_tables.sql file in the snowflake folder of this branch.
 
-You can then start the webserver using a shell script or running these commmands in your terminal:
+# Scheduling of DAGs
+The DAG responsible for fetching weather data is scheduled to run every 15 minutes.  This is sufficient to provide historical data that can be analyzed.  Real-time weather data from XWeather could be collected with Kafka, however for a study of historical data this is overkill and will require a lot of storage, let alone the monthly cost for an API subscription.
 
-`export AIRFLOW_HOME=$(pwd)`
+The DAG responsible for fetching pollution data is scheduled to run every hour but could easily be changed to every 10 or 15 minutes.  One thing to consider when regularly collecting data from Openweather is the API limit of 1000 calls/day.  For 5 cities, you can collect weather and pollution data every 15 minutes with 40 calls leftover at the end of the day.
 
-`airflow scheduler & airflow webserver -p 8080`
-
-Try running the openweather_current_dag and notice the weather updates without you having to trigger it.
-
-You can also try triggering the city_dimensions_dag and it will create or update the dimension data
+Because the dimension data about a city is essentially static (A city's name, country, and timezone rarely changes), the DAG responsible for fetching this type of data is trigger-based and not on a schedule.
