@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS pollution (
 );
 ```
 
-After the data is saved on a local postgreSQL database, it is then transferred to a data warehouse using the `postgres_to_snowflake_etl` for globalizing data.
-The corresponding Snowflake SQL table structures with it's specific syntax can be found in the create_tables.sql file in the snowflake folder of this branch.
+After the data is saved on a local postgreSQL database, it is then transferred to a data warehouse using the `postgres_to_snowflake_etl` DAG for globalizing data.
+The corresponding Snowflake SQL table structures with it's specific syntax can be found in the `create_tables.sql` file in the snowflake folder of this branch.
 The Snowflake tables can be queried with a simple `SELECT` statement in the Snowflake console as shown below:
 ![Alt Text](screenshots/snowflake_weather_query.png)
