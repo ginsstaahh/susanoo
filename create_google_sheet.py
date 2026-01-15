@@ -6,8 +6,11 @@ def create(title, folder_id):
     """
     Creates the Sheet the user has access to.
     Load pre-authorized user credentials from the environment.
-    TODO(developer) - See https://developers.google.com/identity
+    See https://developers.google.com/identity
     for guides on implementing OAuth2 for the application.
+    Args:
+        title: Title of the spreadsheet to create.
+        folder_id: The ID of the folder where the spreadsheet will be created.
     """
     # pylint: disable=maybe-no-member
     try:
