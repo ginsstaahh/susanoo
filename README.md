@@ -119,10 +119,3 @@ For pollution data the tabular format looks like such:
 |city     |country|time    |aqi          |co                 |no  |no2  |o3    |so2 |pm2_5|pm10 |nh3 |
 |---------|-------|--------|-------------|-------------------|----|-----|------|----|-----|-----|----|
 |Vancouver|CA     |2025-03-29 15:48:06|1            |323.77             |1.54|12.17|57.94 |4.29|2.8  |4.92 |1.76|
-
-## Scheduling of DAGs
-The DAG responsible for fetching weather data is scheduled to run every 15 minutes.  This is sufficient to provide historical data that can be analyzed.  Real-time weather data from XWeather could be collected with Kafka, however for a study of historical data this is overkill and will require a lot of storage, let alone the monthly cost for an API subscription.
-
-The DAG responsible for fetching pollution data is scheduled to run every hour but could easily be changed to every 10 or 15 minutes.  One thing to consider when regularly collecting data from Openweather is the API limit of 1000 calls/day.  For 5 cities, you can collect weather and pollution data every 15 minutes with 40 calls leftover at the end of the day.
-
-Because the dimension data about a city is essentially static (A city's name, country, and timezone rarely changes), the DAG responsible for fetching this type of data is trigger-based and not on a schedule.
