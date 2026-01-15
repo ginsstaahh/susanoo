@@ -66,6 +66,9 @@ with DAG('upload_weather_data_dag',
 
     @task
     def check_file_exists(**kwargs):
+        """Checks if the weather data file exists for the given execution date
+        Keyword Args:
+            ds (str) - The execution date in 'YYYY-MM-DD' format"""
         ds = kwargs['ds']
         filename = f'weather-{ds}.json'
 
@@ -80,7 +83,7 @@ with DAG('upload_weather_data_dag',
         """Branches the DAG.  If the file exists, the clean_data task is run.
         Otherwise the DAG skips to the end_tasks.
         Args:
-            file_exists (bool): Whether the weather data file exists
+            file_exists (bool) - Whether the weather data file exists
         """
         if file_exists:
             return ['clean_data']
@@ -99,7 +102,7 @@ with DAG('upload_weather_data_dag',
     def upload_data(**kwargs):
         """Uploads the weather data file to the S3 bucket
         Keyword Args:
-            ds (str): The execution date in 'YYYY-MM-DD' format
+            ds (str) - The execution date in 'YYYY-MM-DD' format
         """
         ds = kwargs['ds']
         filename = f'weather-{ds}.json'

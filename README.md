@@ -137,4 +137,4 @@ For pollution data the refined JSON format looks like such:
 }
 ```
 
-Airflow performs a daily backfill check to see if a local JSON file exist for the day.  There is a cleaning step using the bash `sort` command before uploaded the file to S3 using boto3.
+Airflow performs a daily backfill check to see if a local JSON file exist for the day.  There is a cleaning step using the bash `sort -u` command before uploaded the file to S3 using boto3.
