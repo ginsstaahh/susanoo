@@ -25,6 +25,11 @@ with DAG(
 
     @task
     def postgres_to_snowflake(**kwargs):
+        """Extracts data from PostgreSQL and loads it into Snowflake
+        Keyword Args:
+            table - the table name to be queried
+            engine - SQLAlchemy engine to connect to PostgreSQL using pandas
+        """
         tablename = kwargs['table']
         engine = kwargs['engine']
         data = pd.read_sql(tablename, engine)

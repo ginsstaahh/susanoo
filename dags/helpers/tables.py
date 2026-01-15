@@ -4,6 +4,9 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 class City(Base):
+    """SQLAlchemy model for the cities table
+    Args:
+        Base - a factory function that creates a base class for defining object-relational mapping (ORM) models"""
     __tablename__ = 'cities'
     
     id = Column('id', Integer, primary_key=True)
@@ -14,6 +17,9 @@ class City(Base):
     timezone = Column('timezone', Integer, nullable=False)
     
 class Weather(Base):
+    """SQLAlchemy model for the weather table
+    Args:
+        Base - a factory function that creates a base class for defining object-relational mapping (ORM) models"""
     __tablename__ = 'weather'
     
     id = Column('id', Integer, primary_key=True)
@@ -32,6 +38,9 @@ class Weather(Base):
     wind_deg = Column('wind_deg', Integer, nullable=False)
 
 class Pollution(Base):
+    """SQLAlchemy model for the pollution table
+    Args:
+        Base - a factory function that creates a base class for defining object-relational mapping (ORM) models"""
     __tablename__ = 'pollution'
     
     id = Column('id', Integer, primary_key=True)

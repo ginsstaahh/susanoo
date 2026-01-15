@@ -7,6 +7,10 @@ def kelvin_to_celsius(kelvin):
     return celsius
 
 def transform_weather_data(task_instance):
+    """refines weather data to an SQL format and saves to database
+    Args:
+        task_instance - The task instance from Airflow to pull XCom data
+    """
     weather_data = task_instance.xcom_pull(task_ids='get_weather_data')
     weather = Weather(
         city = weather_data['name'],
@@ -27,6 +31,12 @@ def transform_weather_data(task_instance):
     session.commit()
 
 def transform_pollution_data(task_instance, city, country):
+    """refines pollution data to an SQL format and saves to database
+    Args:
+        task_instance - The task instance from Airflow to pull XCom data
+        city - The city for which the pollution data was fetched
+        country - The country of the city
+    """
     pollution_data = task_instance.xcom_pull(task_ids='get_pollution_data')
     pollution = Pollution(
         city = city,
@@ -46,8 +56,10 @@ def transform_pollution_data(task_instance, city, country):
     session.commit()
 
 def transform_city_data(task_instance):
-    """uses the HTTP response from Openweather to store
-    dimension data of the city being queried in cities SQL table"""
+    """refines city data to an SQL format and saves to database
+    args:
+        task_instance - The task instance from Airflow to pull XCom data
+    """
     weather_data = task_instance.xcom_pull(task_ids='get_city_data')
     city = City(
         city = weather_data['name'],
