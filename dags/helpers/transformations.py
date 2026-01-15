@@ -3,6 +3,11 @@ from helpers.session import session
 from helpers.tables import Weather, Pollution, City
 
 def kelvin_to_celsius(kelvin):
+    """Converts temperature from Kelvin to Celsius
+    Args:
+        kelvin - Temperature in Kelvin
+    Returns:
+        celsius - Temperature in Celsius rounded to 2 decimal places"""
     celsius = round(kelvin - 273.15, 2)
     return celsius
 
