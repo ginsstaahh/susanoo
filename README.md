@@ -7,7 +7,7 @@ Susanoo is a data engineering project that explores the different formats data c
 | csv  | CSV  | gsheets on Google Drive  |
 | sql  | postgreSQL  | Snowflake Data Warehouse  |
 
-To see how each branch handles local and cloud data storage, read each branch's README for their respective process.  The main branch holds unanimous information shared by all three branches as well as the project analysis, but the DAGs, data and all the processes are all in the other branches.
+To see how each branch handles local and cloud data storage, read each branch's README for their respective process.  The main branch holds unanimous information shared by all three branches as well as the project analysis, but the DAGs, data and all the processes are in the other branches.
 
 Susanoo is a sister project to Akashi.  Whereas Akashi is a full-scale data engineering + analytics project with stock graphs for end users, Susanoo is a purely data engineering project that explores the many ways data can be formatted and stored.  It is named after the Japanese storm god in Shinto religion.
 
@@ -31,7 +31,7 @@ You can then start the webserver using a shell script or running these commmands
 
 Try turning on the vancouver_weather_etl and notice the weather updates without you having to trigger it.
 
-You can also try triggering the city_etl DAG and it will create or update the city dimension data
+You can also try triggering the city_etl DAG and it will create or update the city data
 
 ## On the applications for data scientists
 Weather data can be used for data scientists interested in learning about the climate in the specific city.  If this program were to run on a server for years recording weather data, data scientists could also use it to find insights on climate change and it's impact to each city.  Additionally, comparisons of the impact of climate change between different cities could also be studied.  Data scientists can also join the weather data with other datasets.  For example, if a data scientist had a dataset about traffic accidents in Vancouver, they could join the two datasets on city and country to see if there is any correlation between weather events and traffic accidents.
@@ -42,7 +42,7 @@ This open-source project does not record data for years due to the hourly cost o
 When it comes to data cleaning, backfilling is the usual answer.  However, when collecting pollution data about LA for a few hours, there were often consecutive NaN values which means that backfilling won't work.  Setting these values to 0 will also affect a machine learning algorithm.  A data scientist could choose to not use a column with missing values for machine learning but will miss out on dimensionality.  There is a tradeoff however you go about it.  One area that is not as greatly affected is data visualization which will still work and not lose performance when values are 0.
 
 ## On the comparison of data formats
-Data scientists with permissions can work with the JSON in S3 buckets using tools like Spark on EMR or Glue. In a way, Spark makes it easy to work with many formats of data including JSON.  However, storing data in S3 as a parquet file has the best compression and performance and should be considered if seriously using Spark to work with a data lake.  The pandas library has a method to convert a dataframe into parquet and upload to AWS.
+Data scientists with permissions can work with the JSON in S3 buckets using tools like Spark on EMR or Glue. In a way, Spark makes it easy to work with many formats of data including semi-structured data and JSON.  However, storing data in S3 as a parquet file has the best compression and performance and should be considered if seriously using Spark to work with a data lake.  The pandas library has a method to convert a dataframe into parquet and upload to AWS.
 
 gsheets is a nice and easy way for non-technical users to examine the data collected without getting their hands dirty with AWS or Snowflake.  There are also data visualization tools they can use in gsheets.  However, for more advanced programming like time series forecasting, gsheets is not a viable option as it is not compatible with python libraries like pandas, scikit-learn or tensorflow that are needed.  When running airflow to upload weather data periodically, gsheets was quick to update the values.
 
