@@ -7,7 +7,7 @@ Susanoo is a data engineering project that explores the different formats data c
 | csv  | CSV  | gsheets on Google Drive  |
 | sql  | postgreSQL  | Snowflake Data Warehouse  |
 
-To see how each branch handles local and cloud data storage, read each branch's README for their respective process.  The main branch holds unanimous information shared by all three branches as well as the project analysis, but the DAGs, data and all the processes are in the other branches.
+To see how each branch handles local and cloud data storage, read each branch's README for their respective process.  The main branch holds unanimous information shared by all three branches as well as the project analysis, but the DAGs, data and the processes are in all the other branches.
 
 Susanoo is a sister project to Akashi.  Whereas Akashi is a full-scale data engineering + analytics project with stock graphs for end users, Susanoo is a purely data engineering project that explores the many ways data can be formatted and stored.  It is named after the Japanese storm god in Shinto religion.
 
@@ -44,6 +44,6 @@ When it comes to data cleaning, backfilling is the usual answer.  However, when 
 ## On the comparison of data formats
 Data scientists with permissions can work with the JSON in S3 buckets using tools like Spark on EMR or Glue. In a way, Spark makes it easy to work with many formats of data including semi-structured data and JSON.  However, storing data in S3 as a parquet file has the best compression and performance and should be considered if seriously using Spark to work with a data lake.  The pandas library has a method to convert a dataframe into parquet and upload to AWS.
 
-gsheets is a nice and easy way for non-technical users to examine the data collected without getting their hands dirty with AWS or Snowflake.  There are also data visualization tools they can use in gsheets.  However, for more advanced programming like time series forecasting, gsheets is not a viable option as it is not compatible with python libraries like pandas, scikit-learn or tensorflow that are needed.  When running airflow to upload weather data periodically, gsheets was quick to update the values.
+gsheets is a nice and easy way for non-technical users to examine the data collected without getting their hands dirty with AWS or Snowflake.  There are also data visualization tools they can use in gsheets.  However, for more advanced programming like time series forecasting, gsheets is not a viable option as it is not compatible with python libraries like pandas, XGBoost or tensorflow that are needed.  When running airflow to upload weather data periodically, gsheets was quick to update the values.
 
 SQL provides the fastest retrieval of data both locally and in a data warehouse.  It is even faster than reading data from CSV files.  It's not so intimidating to access data from a postgres database as you can actually use pandas to load SQL data into memory.  The Snowflake data warehouse is an extension of the local database and was used to globalize the data for use of a team project.  If you're processing data with the SQL language and for the fastest processing time, SQL databases and data warehouses are the way to go.
