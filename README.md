@@ -7,7 +7,7 @@ Susanoo is a data engineering project that explores the different formats data c
 | csv  | CSV  | gsheets on Google Drive  |
 | sql  | postgreSQL  | Snowflake Data Warehouse  |
 
-To see how each branch handles local and cloud data storage, read each branch's README for their respective process.  The main branch holds unanimous information shared by all three branches as well as a project analysis.
+To see how each branch handles local and cloud data storage, read each branch's README for their respective process.  The main branch holds unanimous information shared by all three branches as well as the project analysis, but the DAGs, data and all the processes are all in the other branches.
 
 Susanoo is a sister project to Akashi.  Whereas Akashi is a full-scale data engineering + analytics project with stock graphs for end users, Susanoo is a purely data engineering project that explores the many ways data can be formatted and stored.  It is named after the Japanese storm god in Shinto religion.
 
