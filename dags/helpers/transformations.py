@@ -66,20 +66,20 @@ def transform_pollution_data(task_instance, city, country):
         file.write('\n')
 
     
-    def transform_city_data(task_instance):
-        """Processes raw JSON data to extract contextual data of the city
-        Args:
-            task_instance - The task instance from Airflow to pull XCom data
-        """
-        weather_data = task_instance.xcom_pull(task_ids='get_city_data')
-        transformed_data = {
-            'city': weather_data['name'],
-            'country': weather_data['sys']['country'],
-            'longitude': weather_data['coord']['lon'],
-            'latitude': weather_data['coord']['lat'],
-            'timezone': weather_data['timezone'],
-        }
+def transform_city_data(task_instance):
+    """Processes raw JSON data to extract contextual data of the city
+    Args:
+        task_instance - The task instance from Airflow to pull XCom data
+    """
+    weather_data = task_instance.xcom_pull(task_ids='get_city_data')
+    transformed_data = {
+        'city': weather_data['name'],
+        'country': weather_data['sys']['country'],
+        'longitude': weather_data['coord']['lon'],
+        'latitude': weather_data['coord']['lat'],
+        'timezone': weather_data['timezone'],
+    }
 
-        with open('city_dimensions.json', 'a') as file:
-            json.dump(transformed_data, file)
-            file.write('\n')
+    with open('cities/cities.json', 'a') as file:
+        json.dump(transformed_data, file)
+        file.write('\n')

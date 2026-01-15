@@ -19,13 +19,13 @@ default_args = {
     'iam_user': '',
 }
 
-with DAG('city_dimensions_dag',
+with DAG('city_etl_dag',
         default_args=default_args,
         schedule_interval=None,
         catchup=False
 ) as dag:
 
-    get_city_data = HttpOperator(
+    extract_data = HttpOperator(
         task_id='get_city_data',
         http_conn_id='openweather_conn',
         endpoint=f'data/{openweather_version}/weather?q={city},{province},{country}&appid={openweather_api_key}',
@@ -34,8 +34,8 @@ with DAG('city_dimensions_dag',
     )
 
     transform_data = PythonOperator(
-        task_id='save_city_dimension_data',
+        task_id='transform_city_data',
         python_callable=transform_city_data,
     )
 
-get_city_data >> transform_data
+extract_data >> transform_data
