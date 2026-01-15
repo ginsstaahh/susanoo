@@ -4,6 +4,7 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 import json
 import os
+from helpers.transformations import transform_city_data
 
 openweather_api_key = os.environ.get('OPENWEATHER_API_KEY')
 openweather_version = '2.5'
@@ -32,25 +33,9 @@ with DAG('city_dimensions_dag',
         response_filter=lambda response: json.loads(response.text),
     )
 
-    def save_city_dimensions(task_instance):
-        """save_city_dimensions uses the HTTP response from Openweather to store
-        dimension data of the city being queried in a json file"""
-        weather_data = task_instance.xcom_pull(task_ids='get_city_data')
-        transformed_data = {
-            'city': weather_data['name'],
-            'country': weather_data['sys']['country'],
-            'longitude': weather_data['coord']['lon'],
-            'latitude': weather_data['coord']['lat'],
-            'timezone': weather_data['timezone'],
-        }
-
-        with open('city_dimensions.json', 'a') as file:
-            json.dump(transformed_data, file)
-            file.write('\n')
-
-    save_city_dimension_data = PythonOperator(
+    transform_data = PythonOperator(
         task_id='save_city_dimension_data',
-        python_callable=save_city_dimensions,
+        python_callable=transform_city_data,
     )
 
-get_city_data >> save_city_dimension_data
+get_city_data >> transform_data

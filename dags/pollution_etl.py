@@ -95,6 +95,10 @@ with DAG('upload_pollution_data_dag',
 
     @task
     def upload_data(**kwargs):
+        """Uploads the pollution data file to the S3 bucket
+        Keyword Args:
+            ds (str): The execution date in 'YYYY-MM-DD' format
+        """
         ds = kwargs['ds']
         filename = f'pollution-{ds}.json'
 

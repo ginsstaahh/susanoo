@@ -77,12 +77,18 @@ with DAG('upload_weather_data_dag',
 
     @task.branch
     def skip_run(file_exists):
+        """Branches the DAG.  If the file exists, the clean_data task is run.
+        Otherwise the DAG skips to the end_tasks.
+        Args:
+            file_exists (bool): Whether the weather data file exists
+        """
         if file_exists:
             return ['clean_data']
         else:
             return ['end_tasks']
 
-    # create a temporary file to work with before replacing the working file.  This needs to be done for a sort command
+    # create a temporary file to work with before replacing the working file.  This needs to be done for a sort command.
+    # sort -u not only sorts the data but removes duplicates
     clean_data = BashOperator(
         task_id='clean_data',
         bash_command='sort -u ~/Documents/susanoo/weather/weather-{{ ds }}.json > /tmp/weather-{{ ds }}.json && \
@@ -91,6 +97,10 @@ with DAG('upload_weather_data_dag',
 
     @task
     def upload_data(**kwargs):
+        """Uploads the weather data file to the S3 bucket
+        Keyword Args:
+            ds (str): The execution date in 'YYYY-MM-DD' format
+        """
         ds = kwargs['ds']
         filename = f'weather-{ds}.json'
 
