@@ -1,13 +1,11 @@
 # Introduction
-Susanoo is a data engineering project that explores the different formats data can be stored as.  It retrieves pollution and weather data for different cities on the west coast using Openweather's API.  It then transforms the data and then uploads it to the cloud.  There are three distinct git branches, each with different local and cloud data formats and even tailored README files for these specific data formats.  The structure of each branch is shown in the table below:
+There are three distinct git branches, each with different local and cloud data formats. The structure of each branch is shown in the table below:
 
 | Branch Name | Local Data Format | Cloud Storage Type  |
 | ------------- | ------------- | ------------- |
 | json  | JSON  | JSON in an S3 bucket  |
 | csv  | CSV  | gsheets on Google Drive  |
 | sql  | postgreSQL  | Snowflake Data Warehouse  |
-
-Susanoo is an example of performing ETL's on a schedule and formatting fact and dimension data for respective use cases.  This project is a sister project to Akashi.  Whereas Akashi is a full-scale data engineering + analytics project with stock graphs for end users, Akashi is a purely data engineering project that explores the many ways data can be formatted and stored.  It is named after Susanoo, the Japanese storm god in Shinto religion.
 
 # How specifically this branch works
 ## Calling Openweather's API's and reorganizing data
@@ -143,7 +141,7 @@ CREATE TABLE IF NOT EXISTS pollution (
 );
 ```
 
-The data is first saved on a local postgreSQL database and then transferred to a data warehouse using the `postgres_to_snowflake_etl` for globalizing data.
+After the data is saved on a local postgreSQL database, it is then transferred to a data warehouse using the `postgres_to_snowflake_etl` for globalizing data.
 The corresponding Snowflake SQL table structures with it's specific syntax can be found in the create_tables.sql file in the snowflake folder of this branch.
 
 # Scheduling of DAGs
