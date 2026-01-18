@@ -8,6 +8,22 @@ There are three distinct git branches, each with different local and cloud data 
 | sql  | postgreSQL  | Snowflake Data Warehouse  |
 
 # How specifically this branch works
+## Creating a local database
+When creating the local postgres database, the bash command was used to enter into the postgreSQL CLI:
+`sudo -u postgres psql`
+Inside, these commands create the database with the right privileges:
+```
+CREATE DATABASE susanoo;
+ALTER DATABASE susanoo OWNER TO postgres;
+GRANT ALL PRIVILEGES ON DATABASE susanoo TO postgres;
+```
+`postgres` is the owner of the database and also the username needed to access the database when using SQLalchemy as seen in the `session.py` file.
+
+After creation, you can enter into the susanoo database inside the postgres CLI using this command to perform CRUD commands:
+`\c susanoo`
+
+`\q` brings you out of the postgres CLI and back into your bash shell
+
 ## Calling Openweather's API's and reorganizing data
 The normal HTTP response from Openweather's API provided with a given city, country, and an API key returns JSON data like such:
 ```json
@@ -141,7 +157,7 @@ CREATE TABLE IF NOT EXISTS pollution (
 );
 ```
 
-After the data is saved on a local postgreSQL database, it is then transferred to a data warehouse using the `postgres_to_snowflake_etl` DAG for globalizing data.
+After the data is saved on a local postgreSQL database, it is then transferred to a data warehouse using the `postgres_to_snowflake_etl` DAG for globalizing data.  Creating the data warehouse was done using the Snowflake UI and is straightforward.
 The corresponding Snowflake SQL table structures with it's specific syntax can be found in the `create_tables.sql` file in the snowflake folder of this branch.
 The Snowflake tables can be queried with a simple `SELECT` statement in the Snowflake console as shown below:
 ![Alt Text](screenshots/snowflake_weather_query.png)
